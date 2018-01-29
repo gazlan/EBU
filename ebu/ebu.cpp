@@ -25,6 +25,7 @@
 #include "..\shared\slist.h"
 #include "..\shared\search_bmh.h"
 #include "..\shared\search_ac.h"
+#include "..\shared\hash_md5.h"
 
 #include "e_unp.h"
 #include "e_unp_eep.h"
@@ -36,7 +37,7 @@
 ** @@                   internal defines
 ** ******************************************************************** */
 
-#define EBU_VERSION                 "1.64"
+#define EBU_VERSION                 "1.65"
 #define OVERLAY_SIZE_MIN            (64)
 #define OVERLAY_SIZE_LOOKUP         (MAX_PATH + 32)
 
@@ -241,6 +242,7 @@ enum  SSF_HINT
 #define STR_SMART_INSTALL_MAKER                    "Smart Install Maker"
 #define STR_SMART_PUB                              "SmartPub"
 #define STR_SMK_VIDEO                              STR_OVERLAY_START " SMK video" STR_HEADER_MARKER
+#define STR_SNAKE_SOFTWARE                         "SnakeSoftware ExeBook * http://s-soft.org"
 #define STR_SQZ                                    STR_OVERLAY_START " SQZ archver" STR_HEADER_MARKER
 #define STR_STIRLING                               STR_OVERLAY_START " Stirling archver" STR_HEADER_MARKER
 #define STR_SUNRAV_BOOK_OFFICE                     "SunRav BookOffice"
@@ -564,6 +566,7 @@ enum E_BOOK_TYPE
    ET_SMART_INSTALL_MAKER,                   // Smart Install Maker
    ET_SMART_PUB,                             // SmartPub
    ET_SMK_VIDEO,
+   ET_SNAKE_SOFTWARE,                        // SnakeSoftware ExeBook
    ET_SQZ,
    ET_STIRLING,
    ET_SUNRAV_BOOK_OFFICE,                    // SunRav BookOffice
@@ -644,7 +647,7 @@ struct SSF_TEXT_RECORD
    short             _iFoundAt;
 };
 
-const int   E_TEXT_DB_SIZE = 249;
+const int   E_TEXT_DB_SIZE = 250;
 
 ///////////////////////////////////////////////////////////////////////////////
 // ---[ Should be sorted !!
@@ -667,7 +670,9 @@ SSF_TEXT_RECORD   pTextDB[E_TEXT_DB_SIZE] =
 // UNP DET  PR DET_TYPE    ID                                        SIGNATURE                     SIGN. HINT           OFS   HASH                                   SECT  NAME                                      VER            STUB                    PACKER
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if 0
+// --- ---  -- --------    --                                        ---------                     ----------           ---   ----                                   ----  ----                                      ---            ----                    ------
 // UNP DET  PR DET_TYPE    ID                                        SIGNATURE                     SIGN. HINT           OFS   HASH                                   SECT  NAME                                      VER            STUB                    PACKER
+// --- ---  -- --------    --                                        ---------                     ----------           ---   ----                                   ----  ----                                      ---            ----                    ------
    {  0, 0, 0, DT_NONE,    ET_CYBER_ARTICLE_PRO,                                                                                                                           STR_CYBER_ARTICLE_PRO,                    "",            ""                },
    {  0, 0, 0, DT_NONE,    ET_DESKTOP_AUTHOR,                                                                                                                              STR_DESKTOP_AUTHOR,                       "",            ""                },
    {  0, 0, 0, DT_NONE,    ET_DR_EXPLAIN,                                                                                                                                  STR_DR_EXPLAIN,                           "",            ""                },
@@ -708,13 +713,17 @@ SSF_TEXT_RECORD   pTextDB[E_TEXT_DB_SIZE] =
    {  0, 0, 0, DT_NONE,    ET_WIN_EBOOK_COMPILER,                                                                                                                          STR_WIN_EBOOK_COMPILER,                   "",            ""                },
    {  0, 0, 0, DT_NONE,    ET_X_2_NET_WEB_COMPILER,                                                                                                                        STR_X_2_NET_WEB_COMPILER,                 "",            ""                },
    {  0, 0, 0, DT_NONE,    ET_X_READER,                                                                                                                                    STR_X_READER,                             "",            ""                },
+// --- ---  -- --------    --                                        ---------                     ----------           ---   ----                                   ----  ----                                      ---            ----                    ------
 // UNP DET  PR DET_TYPE    ID                                        SIGNATURE                     SIGN. HINT           OFS   HASH                                   SECT  NAME                                      VER            STUB                    PACKER
+// --- ---  -- --------    --                                        ---------                     ----------           ---   ----                                   ----  ----                                      ---            ----                    ------
 #endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Sort from Here !
                            
+// --- ---  -- --------    --                                        ---------                           ----------            ---  ----                                   ----  ----                                      ---            ----                    ------
 // UNP DET  PR DET_TYPE    ID                                        SIGNATURE                           SIGN. HINT            OFS  HASH                                   SECT  NAME                                      VER            STUB                    PACKER
+// --- ---  -- --------    --                                        ---------                           ----------            ---  ----                                   ----  ----                                      ---            ----                    ------
 {  0,    1, 0, DT_NORMAL,  ET_7Z,                                    "377ABCAF271C",                     HINT_OVERLAY_BEGIN,     0, "",                                    0,    STR_7Z,                                   "",            "",                     "",         0  },
 {  0,    1, 0, DT_NORMAL,  ET_7Z_02,                                 "377ABCAF271C0002",                 HINT_OVERLAY_BEGIN,     0, "",                                    0,    STR_7Z,                                   "0.2",         "",                     "",         0  },
 {  0,    1, 0, DT_NORMAL,  ET_7Z_03,                                 "377ABCAF271C0003",                 HINT_OVERLAY_BEGIN,     0, "",                                    0,    STR_7Z,                                   "0.3",         "",                     "",         0  },
@@ -920,6 +929,7 @@ SSF_TEXT_RECORD   pTextDB[E_TEXT_DB_SIZE] =
 {  0,    1, 0, DT_NORMAL,  ET_SIERRA_SOUND,                          "8D0C534F4C0022560D",               HINT_OVERLAY_BEGIN,     0, "",                                    0,    STR_SIERRA_SOUND,                         "",            "",                     "",         0  }, // Stolen from FA 2000
 {  0,    1, 0, DT_NORMAL,  ET_SMART_INSTALL_MAKER,                   "536D61727420496E7374616C6C204D61", HINT_OVERLAY_BEGIN,     0, "F4ACDC9D84A2590B19509E660E05D16A",    1,    STR_SMART_INSTALL_MAKER,                  "",            STR_DELPI_JUNK,         "",         0  },
 {  0,    1, 0, DT_NORMAL,  ET_SMK_VIDEO,                             "534D4B32",                         HINT_OVERLAY_BEGIN,     0, "",                                    0,    STR_SMK_VIDEO,                            "",            "",                     "",         0  }, // Stolen from FA 2000
+{  0,    1, 1, DT_NORMAL,  ET_SNAKE_SOFTWARE,                        "5244415F415243",                   HINT_OVERLAY_END,      -7, "357725BFA0E41CED05B048DA7B38CA7E",    2,    STR_SNAKE_SOFTWARE,                       "",            STR_DELPI_JUNK,         "UPX",      0  },
 {  0,    1, 0, DT_NORMAL,  ET_SQZ,                                   "484C53515A",                       HINT_OVERLAY_BEGIN,     0, "",                                    0,    STR_SQZ,                                  "",            "",                     "",         0  }, // Stolen from FA 2000
 {  0,    1, 0, DT_NORMAL,  ET_STIRLING,                              "135D658C3A",                       HINT_OVERLAY_BEGIN,     0, "",                                    0,    STR_STIRLING,                             "",            "",                     "",         0  }, // Stolen from FA 2000
 {  0,    1, 0, DT_NORMAL,  ET_SUN_ICON_IMAGE,                        "2F2A20466F726D61745F7665727369",   HINT_OVERLAY_BEGIN,     0, "",                                    0,    STR_SUN_ICON_IMAGE,                       "",            "",                     "",         0  }, // Stolen from FA 2000
@@ -961,7 +971,9 @@ SSF_TEXT_RECORD   pTextDB[E_TEXT_DB_SIZE] =
 {  0,    1, 0, DT_NORMAL,  ET_ZIP_SFX_DISTUTILS,                     "6D657461646174615D0A617574686F72", HINT_OVERLAY_BEGIN,     1, "",                                    0,    STR_ZIP_SFX_DISTUTILS,                    "",            STR_MSVC_STUB,          "",         0  }, // [metadata].author
 {  0,    1, 0, DT_HASH,    ET_ZIP_SFX_DISTUTILS_264,                 "",                                 HINT_NONE,              0, "8BD0E5D9B85DBCED9F72D9853E5F28FF",    1,    STR_ZIP_PYTHON_DISTUTILS,                 "2.6.4",       STR_PYTHON_JUNK,        "",         0  },
 {  0,    1, 0, DT_NORMAL,  ET_ZM,                                    "5A4D",                             HINT_OVERLAY_BEGIN,     0, "",                                    0,    STR_ZM,                                   "",            "",                     "",         0  }  // ZM
+// --- ---  -- --------    --                                        ---------                           ----------            ---  ----                                   ----  ----                                      ---            ----                    ------
 // UNP DET  PR DET_TYPE    ID                                        SIGNATURE                           SIGN. HINT            OFS  HASH                                   SECT  NAME                                      VER            STUB                    PACKER
+// --- ---  -- --------    --                                        ---------                           ----------            ---  ----                                   ----  ----                                      ---            ----                    ------
 };             
 // Should be in ascending sort order for binary search !
 // Will be CRASH if not !
@@ -1064,9 +1076,9 @@ static void PrintHeader(const char* const pszFileName)
       );
    }
 
-   int      iEP      = _TheFile.GetEntryPointSectNum() + 1;
    int      iSectNum = 0;
 
+   int      iEP  = _TheFile.GetEntryPointSectNum() + 1;
    DWORD    dwEP = _TheFile.GetEntryPointOffset(iSectNum);
 
    fprintf(_pOut,"\n\nEntryPoint [Sect: %d] %08X / .%08X\n",iEP,dwEP,_TheFile.GetEntryPointVA());
@@ -2543,7 +2555,11 @@ static void ForEach(const char* const pszFilename)
       {
          SSF_TEXT_RECORD*  pRecord = (SSF_TEXT_RECORD*)FindRecord(BookType);
 
-         fprintf(_pOut,"\nErr: Is not yet supported e-book type [%s]\n",pRecord  ?  pRecord->_pszName  :  "");
+         if (pRecord->_bUnpack)
+         {
+            fprintf(_pOut,"\nErr: Is not yet supported e-book type [%s]\n",pRecord  ?  pRecord->_pszName  :  "");
+         }
+
          _MF.Close();
          fclose(_pOut);
          _pOut = NULL;
@@ -2673,9 +2689,9 @@ static bool Autotest()
 
 static void ShowHelp()
 {
-   printf("-*-   EBU  " EBU_VERSION "  *  (c) gazlan 2010, 2011   -*-\n");
+   printf("-*-   EBU  " EBU_VERSION "  *  (c) gazlan 2010..2014   -*-\n");
    printf("\ne-book Unpacker\n");
-   printf("\nUsage: ebu.exe [{-p|-o}|-i|-k] wildcards\n\n");
+   printf("\nUsage: ebu.com [{-p|-o}|-i|-k] wildcards\n\n");
    printf("-i   - Don't try to unpack, show info only\n");
    printf("-k   - Keep the file's overlay on the disk\n");
    printf("-o   - Force treat the file as overlay, not an .exe\n");
@@ -2945,6 +2961,7 @@ int main(int argc,char** argv)
       _pACS = NULL;
       return 0;
    }
+
 
    Walker      Visitor;
    

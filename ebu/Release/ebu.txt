@@ -1,8 +1,8 @@
--*-   EBU  1.64  *  (c) gazlan 2010, 2011   -*-
+-*-   EBU  1.65  *  (c) gazlan 2010..2014   -*-
 
 e-book Unpacker
 
-Usage: ebu.exe [{-p|-o}|-i|-k] wildcards
+Usage: ebu.com [{-p|-o}|-i|-k] wildcards
 
 -i   - Don't try to unpack, show info only
 -k   - Keep the file's overlay on the disk
@@ -36,6 +36,7 @@ Detect:
 	NATATA (V-Book) eBook Compiler
 	Oakley WebCompiler  [v. 1.13]
 	Publicant (ExeBook) * Detect by Extra checks!
+	SnakeSoftware ExeBook * http://s-soft.org
 	Teterin's self-made e-book * Detect by HASH only!
 	WebExe  [v. 1.x]
 

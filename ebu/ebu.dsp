@@ -214,7 +214,7 @@ SOURCE=..\Shared\hex_dump.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\Shared\mmf.hpp
+SOURCE=..\Shared\mmf.h
 # End Source File
 # Begin Source File
 
@@ -242,7 +242,7 @@ SOURCE=..\Shared\search_bmh.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\Shared\search_quick.hpp
+SOURCE=..\Shared\search_quick.h
 # End Source File
 # Begin Source File
 
